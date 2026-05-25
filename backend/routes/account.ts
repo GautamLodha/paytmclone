@@ -24,12 +24,13 @@ router.get('/balance',authMiddleware,async(req:Request,res:Response)=>{
 router.post('/transfer',authMiddleware,async(req:Request,res:Response)=>{
     const {amount,to} = req.body
     const parsedAmount = Number(amount)
+    console.log(req.body);
+    
     if(parsedAmount <= 0){
         return res.status(400).json({msg : "Invalid amount"})
     }
     try {
         await prisma.$transaction(async (tx)=>{
-            
             const sender = await tx.user.findUnique({
                 where : {
                     id : Number(req.userId)
@@ -43,6 +44,7 @@ router.post('/transfer',authMiddleware,async(req:Request,res:Response)=>{
                 }
             })
             if(!sender || sender.account?.balance < parsedAmount){
+                
                 throw new Error("Insufficient balance");
             }
             const receiver = await tx.account.findUnique({
@@ -77,6 +79,7 @@ router.post('/transfer',authMiddleware,async(req:Request,res:Response)=>{
         })
         return res.json({ msg: "Transfer successful" });
     } catch (error : any) {
+                console.log(error.message);
         return res.status(400).json({
             msg : error.message || "transfer failed"
         })
