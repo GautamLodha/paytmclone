@@ -8,7 +8,7 @@ const SignUp = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    username: '', // This will hold the email address
+    username: '', 
     password: '',
   });
 
@@ -22,7 +22,6 @@ const SignUp = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Ready to send to your backend payload
     // console.log('Backend Payload:', formData);
     try {
       const reponse = await api.post('/user/signup',formData);

@@ -6,7 +6,6 @@ const Send = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Retrieve the user data passed from the Dashboard navigation state
   const receiver = location.state?.receiver as {
     id: number;
     firstName: string;
@@ -20,7 +19,6 @@ const Send = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Guard clause in case someone navigates directly to /send without selecting a user
   if (!receiver) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -51,11 +49,10 @@ const Send = () => {
     try {
       const token = localStorage.getItem('token');
       
-      // Post request payload with the target receiver's ID and specified amount
       const response = await api.post(
         '/account/transfer', 
         {
-          to: receiver.id, // Send target receiver ID to backend
+          to: receiver.id, 
           amount: transferAmount,
         },
         {
@@ -68,13 +65,12 @@ const Send = () => {
       setStatus({ type: 'success', message: response.data.message || 'Transfer successful!' });
       setAmount(''); // Clear input
       
-      // Optional: Navigate back to dashboard after a short delay
       setTimeout(() => navigate('/dashboard'), 2000);
 
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || 'Transaction failed. Please try again.';
       setStatus({ type: 'error', message: errorMsg });
-      // 2. Capture the exact error message from your backend response
+  
       console.log("Full error object from Axios:", error);
       
       const backendError = error.response?.data?.message || 'Transaction failed. Server unreachable.';

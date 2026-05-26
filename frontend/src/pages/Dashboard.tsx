@@ -15,7 +15,10 @@ const Dashboard = () => {
   const [users, setUsers] = useState<BulkUser[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [filteredUser,setFilteredUser] = useState<BulkUser[]>([])
+  const [filter,setFilter] = useState<string>("")
   // const [balance,setBalance] = useState();
+  console.log("render");
   
   // Dummy balance data (Ready to be swapped with an API call later)
   const [balance, setBalance] = useState<Number>(0);
@@ -33,6 +36,7 @@ const Dashboard = () => {
       // or inside an object property (e.g., response.data.users)
       const userData = Array.isArray(response.data) ? response.data : response.data.users || [];
       setUsers(userData);
+      setFilteredUser(userData)
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -53,24 +57,55 @@ const Dashboard = () => {
       
     }
   }
+  useEffect(()=>{
+
+    const doFilteration = async ()=>{
+      setLoading(true)
+      try {
+      const token = localStorage.getItem('token')
+      const response = await api.get(`/user/bulk?filter=${filter}`,{
+        headers : {
+          Authorization : `Bearer ${token}`
+        }
+      })
+      console.log(response);
+      const filteredData = Array.isArray(response.data) ? response.data : response.data.users || [];
+      setFilteredUser(filteredData)
+    } catch (error) {
+      
+    }finally{
+      setLoading(false)
+    }
+    }
+    // doFilteration()
+
+    const delayfn = setTimeout(()=>{
+    doFilteration()
+    },900)
+
+    return ()=>clearTimeout(delayfn)
+    
+  },[filter])
   useEffect(() => {
-    fetchDashBoard();
+    console.log("called");
+    
+    // fetchDashBoard();
     fetchBalance();
   }, []);
 
   // Filter users based on search query matching firstName, lastName, or email(username)
-  const filteredUsers = users.filter((user) => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      user.firstName?.toLowerCase().includes(searchLower) ||
-      user.lastName?.toLowerCase().includes(searchLower) ||
-      user.username?.toLowerCase().includes(searchLower)
-    );
-  });
+  // const filteredUsers = users.filter((user) => {
+  //   const searchLower = searchQuery.toLowerCase();
+  //   return (
+  //     user.firstName?.toLowerCase().includes(searchLower) ||
+  //     user.lastName?.toLowerCase().includes(searchLower) ||
+  //     user.username?.toLowerCase().includes(searchLower)
+  //   );
+  // });
 
   const handleSendMoney = (user: BulkUser) => {
     // Action trigger when clicking Send Money
-    console.log(`Initiating transfer to: ${user.firstName} (${user.username})`);
+    // console.log(`Initiating transfer to: ${user.firstName} (${user.username})`);
     // alert(`Send money to ${user.firstName} ${user.lastName}?`);
     navigate('/send',{
       state : {
@@ -95,8 +130,17 @@ const Dashboard = () => {
                 ₹{balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </h1>
             </div>
-            <div className="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm">
-              💳
+            
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => navigate('/update')} 
+                className="inline-flex items-center justify-center rounded-xl bg-white/10 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition-all backdrop-blur-sm border border-white/10"
+              >
+                ⚙️ Update Info
+              </button>
+              <div className="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm">
+                💳
+              </div>
             </div>
           </div>
         </div>
@@ -113,8 +157,8 @@ const Dashboard = () => {
             <input
               type="text"
               placeholder="Search users by name or email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
               className="block w-full rounded-xl border border-gray-300 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
@@ -122,11 +166,11 @@ const Dashboard = () => {
           {/* Users List Rendering */}
           {loading ? (
             <div className="py-8 text-center text-sm text-gray-500">Loading directory...</div>
-          ) : filteredUsers.length === 0 ? (
+          ) : filteredUser.length === 0 ? (
             <div className="py-8 text-center text-sm text-gray-500">No users found match your search.</div>
           ) : (
             <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto pr-2">
-              {filteredUsers.map((user) => (
+              {filteredUser.map((user) => (
                 <div 
                   key={user.id} 
                   className="flex items-center justify-between py-4 transition-colors hover:bg-gray-50/50 px-2 rounded-lg"
@@ -164,5 +208,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
+export type {BulkUser}
 export default Dashboard;

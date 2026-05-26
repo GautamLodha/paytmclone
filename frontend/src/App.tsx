@@ -5,6 +5,7 @@ import SignIn from './pages/SignIn'
 import Send from './pages/Send'
 import SignUp from './pages/SignUp'
 import Dashboard from './pages/Dashboard'
+import UpdateInfo from './pages/UpdateInfo'
 
 function App() {
   const [count, setCount] = useState<number>(0)
@@ -18,6 +19,7 @@ function App() {
       <Route path='/signup' element={<SignUp/>} ></Route>
       <Route path='/dashboard' element={<Dashboard/>} ></Route>
       <Route path='/send' element={<Send/>} ></Route>
+      <Route path='/update' element={<UpdateInfo/>} ></Route>
     </Routes>
     </BrowserRouter>
     
